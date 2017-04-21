@@ -1,2 +1,7 @@
 [p]
 	p = manolo
+	p = manolo,p.a
+[a "e.i"]
+	o = yo
+[a "e"]
+	o = ll
