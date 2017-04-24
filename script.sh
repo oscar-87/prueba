@@ -1,5 +1,10 @@
 #!/bin/bash
+lineaInclude=""
+ll="Hola "
+pp="que tal"
+for i in `git branch -r| grep -v HEAD|cut -d "/" -f 2`; do
+   echo $i
+   lineaInclude+="$i "
+done
 
-lineaInclude=$(git branch | grep -n "*"|cut -d "*" -f 2|tr -d '[[:space:]]')
-final=$lineaInclude | $(cut -d "*" -f 2|tr -d '[[:space:]]')
 echo $lineaInclude
