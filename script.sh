@@ -1,41 +1,79 @@
 #!/bin/bash
 
-source gitutil_common.sh
+function load_white_list(){
+  ramas=""
+  if [ $(git config --get $1.lista.blanca)!="" ]; then
+    ramas=$(git config --get $1.lista.blanca)
+  fi
+  echo $ramas
 
-lista_prov=""
-lista_def=""
+}
+
+function load_black_list(){
+  ramas=""
+  if [ $(git config --get $1.lista.negra)!="" ]; then
+    ramas=$(git config --get $1.lista.negra)
+  fi
+  echo $ramas
+
+}
+
+function update_all_branchs(){
+    echo "Updating all branchs from remote..."
+    git remote update --prune
+
+    #Pull from all remote branches
+    for brname in `git branch -r  | grep -v HEAD `; do
+        echo "Updating ${brname/\// }..."
+        CBRANCH=`echo $brname | sed -e 's/.*\///g'`
+        git checkout $CBRANCH
+        git pull ${brname/\// } 
+    done
+    
+    git checkout $BRANCH
+}
+function update_branchs(){
+echo $1 $2 $3 $4
+
+   if [ "$1" = "pullall" ]; then
+      for brname in `git branch -r  | grep -v HEAD `; do
+	  CBRANCH=`echo $brname | sed -e 's/.*\///g'`
+	  echo $CBRANCH $brname
+	  i=2
+   	  #while [ $i -lt $# ]; do
+	  for i in "$@"; do
+		if [ "$CBRANCH" == "$i" ]; then
+            	     echo "Pulling from ${brname/\// }..."
+	    	     git checkout $i
+	    	     git pull $brname
+		fi
+		((i++))
+    	  done
+      done
+   fi
+}
+lista_def[0]=""
+ declare -a blanca
    if [ $(git config  --get pullall.default)=="" ];then
        lista_blanca=$(load_white_list pullall)
        lista_negra=$(load_black_list pullall)
-       brname=$(git branch -r| grep -v "HEAD"|cut -d "/" -f1)
        if [ "$lista_blanca" = "" ] && [ "$lista_negra" = "" ]; then
-	    echo "No existe ninguna lista"
+	   update_all_branchs
+	   exit 1
        elif [ "$lista_blanca" != "" ] && [ "$lista_negra" != "" ]; then
-	    b=1
-	    n=1
-	    blanca=$(echo $lista_blanca| cut -d "," -f$b)
-	    negra=$(echo $lista_negra| cut -d "," -f$n)
-	    while [ "$blanca" != "" ]; do
-		    encontrada=0
-		    while [ "$negra" != "" ] && [ $encontrada -eq 0 ]; do
-			   if [ "$blanca" = "$negra" ]; then
-				encontrada=1
-			   fi
-			   ((n++))
-			   negra=$(echo $lista_negra| cut -d "," -f$n)
-		    done
-		    if [ $encontrada -eq 0 ]; then
-		    	lista_def+=" $blanca"
-		    fi
-		    ((b++))
-		    blanca=$(echo $lista_blanca| cut -d "," -f$b)
+	     b=1
+	    condicion_blanca=$(echo $lista_blanca| cut -d "," -f$b)
+	    while [ "$condicion_blanca" != "" ]; do
+		blanca[$b]=$condicion_blanca
+		((b++))
+		condicion_blanca=$(echo $lista_blanca| cut -d "," -f$b)
 	    done
-	    
-       elif [ "$lista_blanca"!="" && "$lista_negra"="" ]; then
-		echo "entra"
+	    for i in "${blanca[@]}"; do
+		echo $i
+	    done
+       elif [ "$lista_blanca" != "" ] && ["$lista_negra" = "" ]; then
 	     lista_def=$lista_blanca
-       elif [ "$lista_negra"!="" $lista_blanca="" ]; then
-	echo "entra 2"
+       elif [ "$lista_negra" != "" ] && [ $lista_blanca = "" ]; then
 	     for rama in `git branch -r  | grep -v HEAD|cut -d "/" -f2`; do
 		     i=1
 		     final=$(echo $lista_negra| cut -d "," -f$i)
@@ -46,9 +84,9 @@ lista_def=""
 		     done
 	     done
 	fi
+	echo ${#blanca[*]}
+	update_branchs pullall ${blanca[@]}
    else
-	echo "entra 3"
-       $(git config  --get pullall.default)
+      echo "fwefew"
    fi
 
-echo $lista_def
