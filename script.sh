@@ -38,14 +38,15 @@ echo $1 $2 $3 $4
    if [ "$1" = "pullall" ]; then
       for brname in `git branch -r  | grep -v HEAD `; do
 	  CBRANCH=`echo $brname | sed -e 's/.*\///g'`
-	  echo $CBRANCH $brname
+	  echo $CBRANCH
 	  i=2
    	  #while [ $i -lt $# ]; do
 	  for i in "$@"; do
+		echo "entra $CBRANCH $i $#"
 		if [ "$CBRANCH" == "$i" ]; then
             	     echo "Pulling from ${brname/\// }..."
-	    	     git checkout $i
-	    	     git pull $brname
+	    	     git checkout $CBRANCH
+	    	     git pull $brname $i
 		fi
 		((i++))
     	  done
