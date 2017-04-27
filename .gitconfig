@@ -1,7 +1,11 @@
-[p]
-	p = manolo
-	p = manolo,p.a
-[a "e.i"]
-	o = yo
-[a "e"]
-	o = ll
+[pullall "list"]
+	black=master,rama,otra
+	white=prueba
+
+[diffarchive]
+	route=/home/oscar/Escritorio/
+[changesarchive]
+	route=/home/oscar/Escritorio/
+[remotes "list"]
+	black=otro,otro2,origin
+	white=visual
